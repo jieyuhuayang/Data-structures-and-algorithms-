@@ -42,15 +42,15 @@ int main()
 int menu()
 {
     int choice,len;
-    printf("        ****************************\n");
-    printf("        *     1.建立霍夫曼树       *\n");
-    printf("        *     2.生成霍夫曼编码     *\n");
-    printf("        *     3.输入密码查看原文   *\n");
-    printf("        *     4.退出系统           *\n");
-    printf("        *                          *\n");
-    printf("        *     请按顺序执行操作     *\n");
-    printf("        *                          *\n");
-    printf("        ****************************\n");
+    printf("****************************\n");
+    printf("*     1.建立霍夫曼树       *\n");
+    printf("*     2.生成霍夫曼编码     *\n");
+    printf("*     3.输入密码查看原文   *\n");
+    printf("*     4.退出系统           *\n");
+    printf("*                          *\n");
+    printf("*     请按顺序执行操作     *\n");
+    printf("*                          *\n");
+    printf("****************************\n");
     printf("请输入选择:");
     scanf("%d",&choice);
     while(1)
