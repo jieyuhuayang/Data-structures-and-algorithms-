@@ -1,0 +1,227 @@
+//对于给定的一组密文，根据出现的次数建立霍夫曼树、生成霍夫曼编码、编码文件译码
+//email:llu15@lzu.edu.cn
+//本程序共定义了5个函数：菜单、霍夫曼树建立、霍夫曼编码生成、输入密码查看原文 以及排序函数
+//本程序定义了2个结构体：主结构体记录各种信息，辅助结构体只记录权值和下标（方便排序）
+#include<stdio.h>
+// 定义存储结构体
+typedef struct
+{
+    char ch;
+    int weight;
+    int lson;
+    int rson;
+    int parent;
+    int bit[26];
+	int start;
+} huffnode;
+huffnode huff[51];
+
+// 定义辅助结构体，使用此来进行排序
+typedef struct
+{
+    int weight;
+    int adr;
+}assit;
+assit a[26];            //因为最多有26个英文字母，定义长度为26的辅助数组
+
+//函数声明
+int menu();
+int crea_hufftree();
+int huffman_code(int len);
+int decode(int len);
+void sort(assit a[], int length);
+
+
+int main()
+{
+    menu();
+    return 0;
+}
+
+//菜单函数
+int menu()
+{
+    int choice,len;
+    printf("        ****************************\n");
+    printf("        *     1.建立霍夫曼树       *\n");
+    printf("        *     2.生成霍夫曼编码     *\n");
+    printf("        *     3.输入密码查看原文   *\n");
+    printf("        *     4.退出系统           *\n");
+    printf("        *                          *\n");
+    printf("        *     请按顺序执行操作     *\n");
+    printf("        *                          *\n");
+    printf("        ****************************\n");
+    printf("请输入选择:");
+    scanf("%d",&choice);
+    while(1)
+    {
+        switch(choice)
+        {
+            case 1:
+                {
+                    len=crea_hufftree();
+                    break;
+                }
+            case 2:
+                {
+                    printf("字符霍夫曼编码:\n");
+                    huffman_code(len);
+                    break;
+                }
+            case 3:
+                {
+                    decode(len);
+                    break;
+                }
+            case 4:
+                {
+                    system("cls");
+                    printf("谢谢使用，再见!\n");
+                    return 0;
+                }
+        }
+        printf("\n请选择:");
+        scanf("%d",&choice);
+    }
+    return 0;
+}
+
+//建立霍夫曼树函数
+int crea_hufftree()
+{
+    int i,len=-1;
+    char ch;
+    for(i=0;i<=51;i++)                             //完成结构体初始化
+    {
+        huff[i].ch='\0';
+        huff[i].weight=0;
+        huff[i].lson=-1;
+        huff[i].rson=-1;
+        huff[i].parent=0;
+    }
+    printf("请输入字符串：");
+    ch=getchar();                                  //吸收回车
+    ch=getchar();
+    while (ch!='\n')
+    {                                              //读入的电文出现几次，将权设置成多少
+		i=0;
+		while(i<=len)
+        {
+            if (huff[i].ch==ch)
+                {
+                    huff[i].weight++;
+                    break;
+                }
+            else i++;
+        }
+		if (i>len)
+        {
+			huff[i].ch=ch;
+			huff[i].weight=1;
+			len++;
+		}
+		ch=getchar();
+	}
+
+	for(i=0;i<=len;i++)                               //将存储数组复制到辅助数组
+	{
+	    a[i].adr=i;
+	    a[i].weight=huff[i].weight;
+	}
+
+	i=0;
+
+	while(i<len)                                      //要生成剩余的len个节点，所以循环len次
+    {
+        sort(a,len+1-i);                            //依据权值对辅助数组a的前len+1-i项排序
+        i++;
+        huff[len+i].weight=a[0].weight+a[1].weight; //生成根结点的值
+        huff[len+i].lson=a[0].adr;                  //生成左子树
+        huff[len+i].rson=a[1].adr;                  //生成右子树
+        huff[a[0].adr].parent=len+i;                //记录父结点
+        huff[a[1].adr].parent=len+i;                //记录父结点
+        a[0].weight=huff[len+i].weight;             //将生成的二叉树作为辅助数组的第一个元素
+        a[0].adr=len+i;
+        a[1].weight=a[len-i+1].weight;              //将辅助数组的最后一个元素放到第二个元素的位置上
+        a[1].adr=a[len-i+1].adr;                    //以上4个语句作用可以为减少排序的工作量
+    }
+    printf("\n恭喜！霍夫曼树建立成功，按2可以查看字符的霍夫曼编码\n");
+    return len;
+}
+
+//生成霍夫曼编码函数
+//自底向上开始(也就是从数组序号为零的结点开始)向上层层判断,最后输出生成的编码。
+int huffman_code(int len)
+{
+    int c,p,i,j;
+    for(i=0;i<=len;i++)
+    {
+        c=i;
+        p=huff[i].parent;
+        huff[i].start=len;
+        while(p!=0)
+        {
+            if(huff[p].lson==c)                     //若在父结点左侧，则置码为 0,若在右侧,则置码为1
+                huff[i].bit[huff[i].start]=0;
+            else
+                huff[i].bit[huff[i].start]=1;
+            huff[i].start--;                        //记录每个叶结点编码的起始位
+            c=p;
+            p=huff[c].parent;                       //若父结点存在，则层层向上直到p=0(根结点)
+        }
+        printf("%c的霍夫曼编码为: ",huff[i].ch);
+        for(j=huff[i].start+1;j<=len;j++)
+            printf("%d",huff[i].bit[j]);
+        printf("\n");
+    }
+    return 0;
+}
+
+//译码函数
+int decode(int len)
+{
+    int i,j=0;
+    char mima[100];
+    i=2*len;                                  //从根结点开始往下搜索
+    printf("输入霍夫曼编码组成的密码，我们可以为您翻译为原文\n(以#为结束标志)：");
+    fflush(stdin);                            //清空缓冲区
+    gets(mima);                               //输入密码
+    printf("\n译码后的字符为");
+    while(mima[j]!='#')
+    {
+        if(mima[j]=='0')
+        i=huff[i].lson;                       //密码为0，走向左孩子
+        else
+        i=huff[i].rson;                       //密码为1，走向右孩子
+        if(huff[i].lson==-1)                  //如果遇到左孩子为-1，说明该结点是叶结点，可以输出字符了
+        {
+            printf("%c",huff[i].ch);
+            i=2*len;                          //回到根结点
+        }
+        j++;
+    }
+    if(huff[i].lson!=-1&&mima[j]!='#')        //电文读完，但尚未到叶子结点，则输入电文有错
+    printf("\n您输入的密码有错误\n");
+    return 0;
+}
+
+//依据权值大小对辅助数组assit的前n-i项排序，采用冒泡排序方法
+void sort(assit a[], int length)
+{
+    int i,j,tempt;
+	for (i=0;i<length-1;i++)
+	{
+		for (j=0;j<length-i-1;j++)
+		{
+			if (a[j].weight>a[j+1].weight)
+			{
+				tempt = a[j].weight;
+				a[j].weight=a[j+1].weight;
+				a[j+1].weight=tempt;
+				tempt = a[j].adr;
+				a[j].adr=a[j+1].adr;
+				a[j+1].adr=tempt;
+			}
+		}
+	}
+}
