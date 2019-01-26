@@ -30,6 +30,13 @@
   
 2.6 除留余数法：  
 取关键字被某个不大于散列表表长m的数p除后所得的余数为散列地址。即 H(key) = key MOD p,p<=m。不仅可以对关键字直接取模，也可在折叠、平方取中等运算之后取模。对p的选择很重要，一般取素数或m，若p选的不好，容易产生同义词。  
+
+2.7斐波那契（Fibonacci）散列法   
+平方散列法的缺点是显而易见的，所以我们能不能找出一个理想的乘数，而不是拿value本身当作乘数呢？答案是肯定的。  
+- 对于16位整数而言，这个乘数是40503   
+- 对于32位整数而言，这个乘数是2654435769   
+- 对于64位整数而言，这个乘数是11400714819323198485   
+
 ## 3. hash collisions and solutions  
 ### 3.1  hash collisions:   
 The hash function generates the same index for more than one key  
